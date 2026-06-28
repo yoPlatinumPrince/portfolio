@@ -179,6 +179,7 @@
       }, { passive: true });
     }
     const floral = stage.querySelector(".showcase__floral");
+    const texts = [...stage.querySelectorAll(".showcase__text")].map((el) => ({ el, d: parseFloat(el.dataset.parallax) || 1.5 }));
 
     /* ── Resize ── */
     function resize() {
@@ -214,10 +215,15 @@
         hinge.rotation.x = CLOSED + (OPEN - CLOSED) * easeOutCubic(p);
       }
 
-      // floral backdrop reacts to the cursor (parallax)
+      // floral backdrop reacts to the cursor (parallax — background moves opposite)
       if (floral) {
         floral.style.transform =
           `scale(1.14) translate3d(${(-pointerX * 2.4).toFixed(2)}%, ${(-pointerY * 1.6).toFixed(2)}%, 0)`;
+      }
+      // floating scene text reacts to the cursor (foreground parallax — moves with it)
+      for (let k = 0; k < texts.length; k++) {
+        texts[k].el.style.transform =
+          `translate3d(${(pointerX * texts[k].d * 8).toFixed(1)}px, ${(pointerY * texts[k].d * 6).toFixed(1)}px, 0)`;
       }
 
       // gentle float + auto sway + pointer parallax (never a full spin, screen stays toward camera)
