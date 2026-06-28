@@ -93,6 +93,13 @@
         $$("[data-hover-video]").forEach((v) => io2.observe(v));
       }
     }
+
+    // Featured video: plays muted in view (data-autoplay-inview); unmute on hover, re-mute on leave (keep playing).
+    const feat = document.querySelector("[data-featured-video]");
+    if (feat && hasPointer) {
+      feat.addEventListener("mouseenter", () => { feat.muted = false; feat.play().catch(() => { feat.muted = true; }); });
+      feat.addEventListener("mouseleave", () => { feat.muted = true; });
+    }
   }
 
   /* ───────── Split text into masked words ───────── */

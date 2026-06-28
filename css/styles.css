@@ -207,6 +207,38 @@ body::after {
 .chapter__label { font-family: var(--ff-display); font-weight: 600; font-size: clamp(1.1rem, 2.4vw, 1.7rem); letter-spacing: -.01em; }
 .chapter__line { flex: 1; height: 1px; background: var(--line); transform-origin: left; }
 
+/* ───────── Featured — AI music video ───────── */
+.featured { padding: clamp(3.5rem, 9vw, 7rem) var(--pad) clamp(2rem, 5vw, 4rem); }
+.featured__head { display: flex; flex-direction: column; gap: .9rem; margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+.featured__label { font-size: .78rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.featured__title {
+  font-family: var(--ff-display); font-weight: 700;
+  font-size: clamp(2.4rem, 7vw, 5.5rem); line-height: .96; letter-spacing: -.02em;
+}
+.featured__title em { font-family: var(--ff-serif); font-style: italic; font-weight: 400; color: var(--accent); }
+.featured__frame {
+  position: relative; aspect-ratio: 16 / 9; border-radius: 3px; overflow: hidden;
+  background: var(--ink); box-shadow: 0 30px 80px -30px rgba(24, 22, 18, .5);
+}
+.featured__video {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(6%) contrast(1.02);
+  transition: filter .6s var(--ease), transform 1.2s var(--ease);
+}
+.featured__frame:hover .featured__video { filter: none; transform: scale(1.02); }
+.featured__sound {
+  position: absolute; right: clamp(.8rem, 2vw, 1.4rem); bottom: clamp(.8rem, 2vw, 1.4rem);
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .5rem .85rem; border-radius: 100px;
+  background: rgba(24, 22, 18, .55); backdrop-filter: blur(8px);
+  color: var(--bone); font-size: .76rem; letter-spacing: .04em;
+  transition: opacity .5s var(--ease); pointer-events: none;
+}
+.featured__sound em { font-style: normal; }
+.featured__frame:hover .featured__sound { opacity: 0; }
+.featured__meta { margin-top: 1.2rem; color: var(--ink-soft); font-size: 1rem; }
+@media (hover: none) { .featured__sound em { content: none; } }
+
 /* ───────── Work grid ───────── */
 .grid {
   display: grid;
