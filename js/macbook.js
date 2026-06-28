@@ -115,7 +115,7 @@
 
     // black screen bezel + glass
     const bezel = new THREE.Mesh(new THREE.PlaneGeometry(LID_W * 0.93, LID_H * 0.93), black);
-    bezel.position.set(0, LID_H / 2, LID_T / 2 + 0.004);
+    bezel.position.set(0, LID_H / 2, LID_T / 2 + 0.05);
     hinge.add(bezel);
 
     // video screen
@@ -128,7 +128,7 @@
 
     const SCREEN_W = LID_W * 0.86, SCREEN_H = LID_H * 0.80;
     const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_W, SCREEN_H), screenMat);
-    screen.position.set(0, LID_H / 2, LID_T / 2 + 0.006);
+    screen.position.set(0, LID_H / 2, LID_T / 2 + 0.052);
     hinge.add(screen);
 
     // apple-ish hinge bar
@@ -206,6 +206,11 @@
       laptop.rotation.y = Math.sin(time * 0.32) * 0.28 + pointerX * 0.45;
       laptop.rotation.x = -0.04 + Math.sin(time * 0.45) * 0.015 + pointerY * 0.12;
       laptop.position.y = -0.55 + Math.sin(time * 0.7) * 0.045;
+
+      // Force the video frame onto the GPU every render. VideoTexture's auto-update
+      // (via requestVideoFrameCallback) doesn't fire reliably for a video composited
+      // behind the canvas, which left the screen blank white.
+      if (video.readyState >= video.HAVE_CURRENT_DATA) tex.needsUpdate = true;
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);

@@ -94,11 +94,12 @@
       }
     }
 
-    // Featured video: plays muted in view (data-autoplay-inview); unmute on hover, re-mute on leave (keep playing).
-    const feat = document.querySelector("[data-featured-video]");
-    if (feat && hasPointer) {
-      feat.addEventListener("mouseenter", () => { feat.muted = false; feat.play().catch(() => { feat.muted = true; }); });
-      feat.addEventListener("mouseleave", () => { feat.muted = true; });
+    // Music videos: play muted in view (data-autoplay-inview); unmute on hover, re-mute on leave (keep playing).
+    if (hasPointer) {
+      $$("[data-featured-video]").forEach((feat) => {
+        feat.addEventListener("mouseenter", () => { feat.muted = false; feat.play().catch(() => { feat.muted = true; }); });
+        feat.addEventListener("mouseleave", () => { feat.muted = true; });
+      });
     }
   }
 
