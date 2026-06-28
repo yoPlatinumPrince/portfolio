@@ -316,7 +316,13 @@
         <span class="chapter__line"></span>
       </div>
       <div class="showcase__stage">
-        <canvas class="showcase__canvas" id="mbCanvas" aria-label="3D MacBook playing a showreel"></canvas>
+        <!-- texture source for the 3D screen — kept full-size & in-flow (transparent, behind the canvas)
+             so every browser, incl. Safari, actually decodes its frames for the VideoTexture -->
+        <video id="mbVideo" autoplay loop muted playsinline preload="auto" poster="assets/posters/laptop-screen.jpg"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:0">
+          <source src="assets/videos/laptop-screen.mp4" type="video/mp4" />
+        </video>
+        <canvas class="showcase__canvas" id="mbCanvas" aria-label="3D MacBook playing a showreel" style="position:relative;z-index:1"></canvas>
         <div class="showcase__glow" aria-hidden="true"></div>
         <noscript><video class="showcase__fallback" autoplay loop muted playsinline poster="assets/posters/laptop-screen.jpg"><source src="assets/videos/laptop-screen.mp4" type="video/mp4" /></video></noscript>
       </div>
@@ -324,10 +330,6 @@
         <span>Reel 002 — Platinum Prince</span>
         <span>Live on device · drag-free 3D</span>
       </div>
-      <!-- texture source for the 3D screen -->
-      <video id="mbVideo" loop muted playsinline preload="auto" poster="assets/posters/laptop-screen.jpg" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px">
-        <source src="assets/videos/laptop-screen.mp4" type="video/mp4" />
-      </video>
     </section>
 
     <!-- ════════ INDEX LIST ════════ -->
