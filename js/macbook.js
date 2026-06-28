@@ -114,7 +114,7 @@
     hinge.add(lid);
 
     // black screen bezel + glass
-    const bezel = new THREE.Mesh(new THREE.PlaneGeometry(LID_W * 0.93, LID_H * 0.93), black);
+    const bezel = new THREE.Mesh(new THREE.PlaneGeometry(LID_W * 0.90, LID_H * 0.90), black);
     bezel.position.set(0, LID_H / 2, LID_T / 2 + 0.05);
     hinge.add(bezel);
 
@@ -126,7 +126,7 @@
     if ("encoding" in tex) tex.encoding = THREE.sRGBEncoding;
     const screenMat = new THREE.MeshBasicMaterial({ map: tex });
 
-    const SCREEN_W = LID_W * 0.86, SCREEN_H = LID_H * 0.80;
+    const SCREEN_W = LID_W * 0.93, SCREEN_H = LID_H * 0.93;
     const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_W, SCREEN_H), screenMat);
     screen.position.set(0, LID_H / 2, LID_T / 2 + 0.052);
     hinge.add(screen);
