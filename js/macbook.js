@@ -137,9 +137,13 @@
     bar.position.set(0, 0.03, 0);
     hinge.add(bar);
 
-    // open the lid (lean back from vertical)
-    const OPEN = -0.30; // radians back-tilt
-    hinge.rotation.x = OPEN;
+    // lid opening animation — start folded shut, swing open when in view
+    const OPEN = -0.30;   // open back-tilt (radians)
+    const CLOSED = 1.52;  // folded flat over the keyboard
+    const LID_DUR = 1.5;  // seconds to open
+    const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+    let wantOpen = true, lidStart = null;
+    hinge.rotation.x = CLOSED;
 
     // recentre the whole assembly in view
     laptop.position.set(0, -0.55, 0.2);
@@ -174,6 +178,7 @@
         tY = (e.clientY / window.innerHeight) * 2 - 1;
       }, { passive: true });
     }
+    const floral = stage.querySelector(".showcase__floral");
 
     /* ── Resize ── */
     function resize() {
@@ -201,6 +206,19 @@
       const time = t * 0.001;
       pointerX += (tX - pointerX) * 0.05;
       pointerY += (tY - pointerY) * 0.05;
+
+      // lid opening animation (runs once, the first time the scene is on screen)
+      if (wantOpen) {
+        if (lidStart === null) lidStart = time;
+        const p = Math.min(1, (time - lidStart) / LID_DUR);
+        hinge.rotation.x = CLOSED + (OPEN - CLOSED) * easeOutCubic(p);
+      }
+
+      // floral backdrop reacts to the cursor (parallax)
+      if (floral) {
+        floral.style.transform =
+          `scale(1.14) translate3d(${(-pointerX * 2.4).toFixed(2)}%, ${(-pointerY * 1.6).toFixed(2)}%, 0)`;
+      }
 
       // gentle float + auto sway + pointer parallax (never a full spin, screen stays toward camera)
       laptop.rotation.y = Math.sin(time * 0.32) * 0.28 + pointerX * 0.45;
