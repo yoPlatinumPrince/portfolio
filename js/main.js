@@ -101,6 +101,22 @@
         feat.addEventListener("mouseleave", () => { feat.muted = true; });
       });
     }
+
+    // Touch devices (no hover): tap a reel to toggle its sound — only one plays audio at a time.
+    if (!hasPointer) {
+      const sounders = [...$$("[data-hover-video]"), ...$$("[data-featured-video]")];
+      sounders.forEach((v) => {
+        const card = v.closest(".tile, .mv, .interlude") || v;
+        card.addEventListener("click", () => {
+          const wasMuted = v.muted;
+          sounders.forEach((o) => { o.muted = true; });  // mute everything first
+          if (wasMuted) v.muted = false;                  // then unmute the tapped reel
+          v.play().catch(() => {});
+        });
+      });
+      // hint reads "Tap" on touch, and stays visible (no hover to hide it)
+      $$(".mv__sound em").forEach((el) => { el.textContent = "Tap for sound"; });
+    }
   }
 
   /* ───────── Split text into masked words ───────── */
