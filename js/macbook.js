@@ -15,7 +15,7 @@
       // graceful fallback — show the plain video in the stage
       if (canvas) {
         const v = document.createElement("video");
-        Object.assign(v, { src: "assets/videos/laptop-screen.mp4", autoplay: true, loop: true, muted: true, playsInline: true });
+        Object.assign(v, { src: "assets/videos/maybach-music-video.mp4", autoplay: true, loop: true, muted: true, playsInline: true });
         v.className = "showcase__fallback";
         canvas.replaceWith(v);
       }

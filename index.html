@@ -377,11 +377,17 @@
         <span class="chapter__line"></span>
       </div>
       <div class="showcase__stage">
-        <video class="showcase__mockup" autoplay loop muted playsinline preload="none"
-               poster="assets/posters/laptop-mockup.jpg" data-autoplay-inview aria-label="Maybach AI film on a laptop">
-          <source src="assets/videos/laptop-mockup.mp4" type="video/mp4" />
+        <!-- floral scene backdrop (soft botanical bokeh) -->
+        <img class="showcase__floral" src="assets/posters/floral-bg.jpg" alt="" aria-hidden="true" />
+        <!-- texture source for the 3D screen — full-size & in-flow (transparent, behind the canvas)
+             so every browser, incl. Safari, decodes its frames for the VideoTexture -->
+        <video id="mbVideo" autoplay loop muted playsinline preload="auto" poster="assets/posters/maybach-music-video.jpg"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:1">
+          <source src="assets/videos/maybach-music-video.mp4" type="video/mp4" />
         </video>
+        <canvas class="showcase__canvas" id="mbCanvas" aria-label="3D laptop playing the Maybach AI film" style="position:relative;z-index:2"></canvas>
         <div class="showcase__glow" aria-hidden="true"></div>
+        <noscript><video class="showcase__fallback" autoplay loop muted playsinline poster="assets/posters/maybach-music-video.jpg"><source src="assets/videos/maybach-music-video.mp4" type="video/mp4" /></video></noscript>
       </div>
       <div class="showcase__cap">
         <span>Reel 002 — Platinum Prince</span>
@@ -636,6 +642,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/macbook.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
