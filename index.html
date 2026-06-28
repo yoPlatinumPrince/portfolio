@@ -185,22 +185,30 @@
       </div>
 
       <div class="mvs">
-        <figure class="mv" data-cursor="play" data-reveal>
-          <div class="mv__frame">
-            <video class="mv__video" loop muted playsinline preload="none"
-                   poster="assets/posters/ai-music-video.jpg" data-autoplay-inview data-featured-video>
-              <source src="assets/videos/ai-music-video.mp4" type="video/mp4" />
-            </video>
-            <span class="mv__sound" aria-hidden="true">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
-              <em>Hover for sound</em>
-            </span>
-          </div>
-          <figcaption class="mv__cap">
-            <span class="mv__title">AI Music Video</span>
-            <span class="mv__sub">Directed, AI-generated &amp; edited · 2026</span>
-          </figcaption>
-        </figure>
+        <div class="mvs__col">
+          <figure class="mv" data-cursor="play" data-reveal>
+            <div class="mv__frame">
+              <video class="mv__video" loop muted playsinline preload="none"
+                     poster="assets/posters/ai-music-video.jpg" data-autoplay-inview data-featured-video>
+                <source src="assets/videos/ai-music-video.mp4" type="video/mp4" />
+              </video>
+              <span class="mv__sound" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+                <em>Hover for sound</em>
+              </span>
+            </div>
+            <figcaption class="mv__cap">
+              <span class="mv__title">AI Music Video</span>
+              <span class="mv__sub">Directed, AI-generated &amp; edited · 2026</span>
+            </figcaption>
+          </figure>
+
+          <aside class="mv-note" data-reveal>
+            <span class="mv-note__label">On Music</span>
+            <p class="mv-note__line">Every frame, <em>on the beat.</em></p>
+            <p class="mv-note__body">AI-generated worlds, performance cuts and rhythm-led edits — visuals built around the song, not the other way around.</p>
+          </aside>
+        </div>
 
         <figure class="mv mv--square" data-cursor="play" data-reveal>
           <div class="mv__frame">
