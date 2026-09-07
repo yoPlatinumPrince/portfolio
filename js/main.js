@@ -60,15 +60,21 @@
 
   /* ───────── Hover-to-play videos ───────── */
   function initHoverVideos() {
+    // Browsers only allow sound after the first click/tap/keypress on the page. Until then an
+    // unmuted play() rejects and we fall back to muted. We remember which reel is being hovered
+    // and, on that first gesture, switch its sound on immediately.
+    let hovered = null;
+    const unmute = (v) => {
+      v.muted = false;
+      v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+    };
+    const onFirstGesture = () => { if (hovered && hovered.muted) unmute(hovered); };
+    ["pointerdown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, onFirstGesture, { passive: true }));
+
     $$("[data-hover-video]").forEach((v) => {
       const card = v.closest(".tile, .interlude") || v;
-      // Unmute on hover so reels play with sound; if the browser blocks unmuted
-      // playback (no user gesture yet), fall back to muted so the video still plays.
-      const play = () => {
-        v.muted = false;
-        v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
-      };
-      const stop = () => { v.pause(); v.muted = true; };
+      const play = () => { hovered = v; unmute(v); };
+      const stop = () => { if (hovered === v) hovered = null; v.pause(); v.muted = true; };
       if (hasPointer) {
         card.addEventListener("mouseenter", play);
         card.addEventListener("mouseleave", stop);
@@ -97,8 +103,10 @@
     // Music videos: play muted in view (data-autoplay-inview); unmute on hover, re-mute on leave (keep playing).
     if (hasPointer) {
       $$("[data-featured-video]").forEach((feat) => {
-        feat.addEventListener("mouseenter", () => { feat.muted = false; feat.play().catch(() => { feat.muted = true; }); });
-        feat.addEventListener("mouseleave", () => { feat.muted = true; });
+        // Unmute on hover. Before the first click the browser refuses unmuted playback and
+        // play() rejects — fall back to muted so the clip keeps running instead of freezing.
+        feat.addEventListener("mouseenter", () => { hovered = feat; unmute(feat); });
+        feat.addEventListener("mouseleave", () => { if (hovered === feat) hovered = null; feat.muted = true; });
       });
     }
 
@@ -106,7 +114,7 @@
     if (!hasPointer) {
       const sounders = [...$$("[data-hover-video]"), ...$$("[data-featured-video]")];
       sounders.forEach((v) => {
-        const card = v.closest(".tile, .mv, .interlude") || v;
+        const card = v.closest(".tile, .mv, .launch__player, .interlude") || v;
         card.addEventListener("click", () => {
           const wasMuted = v.muted;
           sounders.forEach((o) => { o.muted = true; });  // mute everything first
@@ -294,6 +302,8 @@
       return;
     }
     const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true });
+    // the 3D stage's cinema mode locks page scroll while the film plays
+    window.addEventListener("cinema", (e) => { e.detail ? lenis.stop() : lenis.start(); });
     if (window.gsap && window.ScrollTrigger) {
       // single source of truth: drive lenis from the GSAP ticker only
       // velocity-reactive marquee

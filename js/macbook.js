@@ -1,174 +1,225 @@
 /* ═══════════════════════════════════════════════════════════
-   3D WHITE MACBOOK — procedural model, video-textured screen
-   Three.js (global THREE, r128). Self-contained, no model file.
+   3D MACBOOK PRO 16" (M3, 2024) — glTF model, video-textured screen
+   Three.js (global THREE, r128) + GLTFLoader (+ Draco) + RoomEnvironment.
+   Model: assets/models/macbook-pro-16.glb (nodes: Base, HingePivot > Lid > Screen)
+
+   The Maybach film (#mbVideo) is both the stage backdrop and the texture on the
+   laptop screen. "Play film" flies the laptop to face the camera, takes the stage
+   fullscreen and hands over to the film itself, with sound.
    ═══════════════════════════════════════════════════════════ */
 (() => {
   "use strict";
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasPointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const MODEL_URL = "assets/models/macbook-pro-16.glb";
+
+  function showFallback(canvas) {
+    const v = document.createElement("video");
+    Object.assign(v, { src: "assets/videos/maybach-music-video.mp4", autoplay: true, loop: true, muted: true, playsInline: true });
+    v.className = "showcase__fallback";
+    canvas.replaceWith(v);
+  }
 
   function boot() {
     const canvas = document.getElementById("mbCanvas");
     const video  = document.getElementById("mbVideo");
-    if (!canvas || !video || typeof THREE === "undefined") {
-      // graceful fallback — show the plain video in the stage
-      if (canvas) {
-        const v = document.createElement("video");
-        Object.assign(v, { src: "assets/videos/maybach-music-video.mp4", autoplay: true, loop: true, muted: true, playsInline: true });
-        v.className = "showcase__fallback";
-        canvas.replaceWith(v);
-      }
+    const stage  = document.getElementById("mbStage") || (canvas && canvas.parentElement);
+    const playBtn = document.getElementById("mbPlay");
+    const closeBtn = document.getElementById("mbClose");
+    if (!canvas || !video || !stage || typeof THREE === "undefined" || typeof THREE.GLTFLoader === "undefined") {
+      if (canvas) showFallback(canvas);
       return;
     }
 
-    const stage = canvas.parentElement;
     let W = stage.clientWidth, H = stage.clientHeight;
 
     /* ── Renderer ── */
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    } catch (err) {
+      showFallback(canvas);            // no WebGL — plain video instead of a blank stage
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(W, H, false);
     if ("outputEncoding" in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.95;
 
     /* ── Scene + camera ── */
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 100);
-    camera.position.set(0, 0.95, 5.0);
-    camera.lookAt(0, 0.35, 0);
+    const IDLE_LOOK = new THREE.Vector3(0, 0.0, 0);
+    const idleCamPos = new THREE.Vector3();
+    // close in so the laptop fills the stage; pull back on narrow (portrait) stages so the
+    // whole laptop, sway included, stays in frame
+    function frameCamera() {
+      const z = Math.max(3.5, 5.9 / camera.aspect);
+      idleCamPos.set(0, 0.72 * (z / 3.5), z);
+    }
+    frameCamera();
+    camera.position.copy(idleCamPos);
+    camera.lookAt(IDLE_LOOK);
 
-    /* ── Lights (matte white aluminium read) ── */
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x9c958a, 0.95));
-    const key = new THREE.DirectionalLight(0xffffff, 1.15);
+    // soft studio reflections for the aluminium (metallic PBR needs an environment)
+    if (typeof THREE.RoomEnvironment !== "undefined") {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+      pmrem.dispose();
+    }
+
+    /* ── Lights ── */
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x9c958a, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 0.9);
     key.position.set(3.5, 6, 5);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xfff3e8, 0.45);
+    const fill = new THREE.DirectionalLight(0xfff3e8, 0.35);
     fill.position.set(-5, 2, 3);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xdfe6ff, 0.6);
+    const rim = new THREE.DirectionalLight(0xdfe6ff, 0.5);
     rim.position.set(-1, 3, -5);
     scene.add(rim);
 
-    /* ── Materials ── */
-    const alu = new THREE.MeshStandardMaterial({ color: 0xf3f1ec, metalness: 0.35, roughness: 0.42 });
-    const aluDark = new THREE.MeshStandardMaterial({ color: 0xeae7e0, metalness: 0.4, roughness: 0.5 });
-    const black = new THREE.MeshStandardMaterial({ color: 0x0c0c0d, metalness: 0.2, roughness: 0.6 });
-
-    /* ── Rounded slab helper (rounded rect → extruded) ── */
-    function roundedSlab(w, d, thick, radius, material) {
-      const s = new THREE.Shape();
-      const x = -w / 2, y = -d / 2, r = radius;
-      s.moveTo(x + r, y);
-      s.lineTo(x + w - r, y);
-      s.quadraticCurveTo(x + w, y, x + w, y + r);
-      s.lineTo(x + w, y + d - r);
-      s.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
-      s.lineTo(x + r, y + d);
-      s.quadraticCurveTo(x, y + d, x, y + d - r);
-      s.lineTo(x, y + r);
-      s.quadraticCurveTo(x, y, x + r, y);
-      const geo = new THREE.ExtrudeGeometry(s, {
-        depth: thick, bevelEnabled: true,
-        bevelThickness: thick * 0.28, bevelSize: thick * 0.28, bevelSegments: 3, curveSegments: 12
-      });
-      geo.center();
-      return new THREE.Mesh(geo, material);
-    }
-
-    /* ── Laptop group ── */
-    const laptop = new THREE.Group();
-    scene.add(laptop);
-
-    const BASE_W = 3.15, BASE_D = 2.15, BASE_T = 0.13;
-    const LID_W = 3.15, LID_H = 2.02, LID_T = 0.08;
-
-    // base (lies flat in XZ)
-    const base = roundedSlab(BASE_W, BASE_D, BASE_T, 0.12, alu);
-    base.rotation.x = -Math.PI / 2;
-    base.position.y = BASE_T / 2;
-    laptop.add(base);
-
-    // keyboard well + trackpad hints (subtle, just for read)
-    const well = new THREE.Mesh(
-      new THREE.PlaneGeometry(BASE_W * 0.82, BASE_D * 0.55),
-      aluDark
-    );
-    well.rotation.x = -Math.PI / 2;
-    well.position.set(0, BASE_T + 0.001, BASE_D * 0.12);
-    laptop.add(well);
-    const pad = new THREE.Mesh(
-      new THREE.PlaneGeometry(BASE_W * 0.32, BASE_D * 0.26),
-      aluDark
-    );
-    pad.rotation.x = -Math.PI / 2;
-    pad.position.set(0, BASE_T + 0.002, BASE_D * 0.30);
-    laptop.add(pad);
-
-    // lid pivot at the rear hinge
-    const hinge = new THREE.Group();
-    hinge.position.set(0, BASE_T, -BASE_D / 2);
-    laptop.add(hinge);
-
-    const lid = roundedSlab(LID_W, LID_H, LID_T, 0.10, alu);
-    lid.position.set(0, LID_H / 2, 0);
-    hinge.add(lid);
-
-    // black screen bezel + glass
-    const bezel = new THREE.Mesh(new THREE.PlaneGeometry(LID_W * 0.90, LID_H * 0.90), black);
-    bezel.position.set(0, LID_H / 2, LID_T / 2 + 0.05);
-    hinge.add(bezel);
-
-    // video screen
+    /* ── Video texture for the display ── */
     const tex = new THREE.VideoTexture(video);
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.generateMipmaps = false;
+    tex.flipY = false;                       // glTF UVs have their origin top-left
     if ("encoding" in tex) tex.encoding = THREE.sRGBEncoding;
-    const screenMat = new THREE.MeshBasicMaterial({ map: tex });
+    const screenMat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+    // Letterbox, never crop: anything the display shows outside the film's UV square is black.
+    screenMat.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <map_fragment>",
+        `vec4 texelColor = texture2D( map, vUv );
+         if ( vUv.x < 0.0 || vUv.x > 1.0 || vUv.y < 0.0 || vUv.y > 1.0 ) texelColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+         texelColor = mapTexelToLinear( texelColor );
+         diffuseColor *= texelColor;`
+      );
+    };
 
-    const SCREEN_W = LID_W * 0.93, SCREEN_H = LID_H * 0.93;
-    const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_W, SCREEN_H), screenMat);
-    screen.position.set(0, LID_H / 2, LID_T / 2 + 0.052);
-    hinge.add(screen);
-
-    // apple-ish hinge bar
-    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, LID_W * 0.96, 16), aluDark);
-    bar.rotation.z = Math.PI / 2;
-    bar.position.set(0, 0.03, 0);
-    hinge.add(bar);
-
-    // lid opening animation — start folded shut, swing open when in view
-    const OPEN = -0.30;   // open back-tilt (radians)
-    const CLOSED = 1.52;  // folded flat over the keyboard
-    const LID_DUR = 1.5;  // seconds to open
-    const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
-    let wantOpen = true, lidStart = null;
-    hinge.rotation.x = CLOSED;
-
-    // recentre the whole assembly in view
-    laptop.position.set(0, -0.55, 0.2);
-    laptop.rotation.x = -0.04;
-
-    /* ── Cover-fit the video onto the screen plane ── */
+    let SCREEN_ASPECT = 16 / 10;             // updated from the mesh once loaded
     function fitTexture() {
       const vw = video.videoWidth, vh = video.videoHeight;
       if (!vw || !vh) return;
-      const planeAspect = SCREEN_W / SCREEN_H;
       const videoAspect = vw / vh;
+      // "contain": the film fills the display's width (or height) and the rest is black bars
       tex.center.set(0.5, 0.5);
-      if (videoAspect > planeAspect) {
-        tex.repeat.set(planeAspect / videoAspect, 1);
-      } else {
-        tex.repeat.set(1, videoAspect / planeAspect);
-      }
-      tex.offset.set((1 - tex.repeat.x) / 2, (1 - tex.repeat.y) / 2);
+      tex.offset.set(0, 0);
+      if (videoAspect > SCREEN_ASPECT) tex.repeat.set(1, videoAspect / SCREEN_ASPECT);
+      else tex.repeat.set(SCREEN_ASPECT / videoAspect, 1);
     }
     video.addEventListener("loadedmetadata", fitTexture);
-    if (video.videoWidth) fitTexture();
 
     const playVideo = () => video.play().catch(() => {});
     video.addEventListener("canplay", playVideo);
     playVideo();
+
+    /* ── Laptop rig ── */
+    const laptop = new THREE.Group();
+    scene.add(laptop);
+    const RIG_Y = -0.62, RIG_SCALE = 0.78;      // framing inside the stage
+    laptop.position.set(0, RIG_Y, 0);
+    laptop.scale.setScalar(RIG_SCALE);
+    laptop.rotation.x = -0.04;
+
+    // lid: model ships open; we fold it shut and swing it open in view
+    let hingePivot = null, screenMesh = null;
+    const OPEN = 0;                 // model's own resting angle (≈110° open)
+    let CLOSED = 1.86;              // computed from the lid's up-vector once loaded
+    let CINEMA_LID = 0.35;          // lid straight up, facing the camera
+    const LID_DUR = 1.6;
+    const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+    const easeInOut = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    let wantOpen = true, lidStart = null, loaded = false;
+
+    /* ── Cinema mode state ── */
+    // idle → toCinema → cinema → toIdle → idle
+    let mode = "idle", blendStart = null, k = 0;
+    const CINEMA_DUR = 1.5;
+    const cinema = { center: new THREE.Vector3(0, 0.35, 0), camPos: new THREE.Vector3(0, 0.35, 3) };
+
+    function computeCinemaPose() {
+      if (!hingePivot || !screenMesh) return;
+      const keep = { ry: laptop.rotation.y, rx: laptop.rotation.x, py: laptop.position.y, lid: hingePivot.rotation.x };
+      laptop.rotation.set(0, 0, 0); laptop.position.y = RIG_Y; hingePivot.rotation.x = CINEMA_LID;
+      laptop.updateMatrixWorld(true);
+      const sb = new THREE.Box3().setFromObject(screenMesh);
+      sb.getCenter(cinema.center);
+      const h = sb.max.y - sb.min.y, w = sb.max.x - sb.min.x;
+      const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const dist = Math.max((h / 2) / t, (w / 2) / (t * camera.aspect)) * 1.02;
+      cinema.camPos.set(cinema.center.x, cinema.center.y, cinema.center.z + dist);
+      laptop.rotation.set(keep.rx, keep.ry, 0); laptop.position.y = keep.py; hingePivot.rotation.x = keep.lid;
+    }
+
+    const loader = new THREE.GLTFLoader();
+    if (typeof THREE.DRACOLoader !== "undefined") {
+      const draco = new THREE.DRACOLoader();
+      draco.setDecoderPath("js/vendor/draco/");
+      loader.setDRACOLoader(draco);
+    }
+    loader.load(MODEL_URL, (gltf) => {
+      const model = gltf.scene;
+      model.updateMatrixWorld(true);   // bake node transforms before measuring anything
+
+      // recentre on the base footprint, feet on y = 0
+      const base = model.getObjectByName("Base") || model;
+      const bb = new THREE.Box3().setFromObject(base);
+      const c = bb.getCenter(new THREE.Vector3());
+      model.position.set(-c.x, -bb.min.y, -c.z);
+      laptop.add(model);
+      model.updateMatrixWorld(true);
+
+      // materials: video on the display, PBR tidy-up elsewhere
+      model.traverse((o) => {
+        if (!o.isMesh) return;
+        o.frustumCulled = false;
+        if (o.name === "Screen") {
+          screenMesh = o;
+          o.material = screenMat;
+          const sb = new THREE.Box3().setFromObject(o);
+          const size = sb.getSize(new THREE.Vector3());
+          const h = Math.hypot(size.y, size.z);
+          if (size.x && h) SCREEN_ASPECT = size.x / h;
+          fitTexture();
+          o.renderOrder = 2;
+        } else if (o.name === "ScreenGlass") {
+          o.material.polygonOffset = true; o.material.polygonOffsetFactor = 1; o.material.polygonOffsetUnits = 1;
+        } else if (o.material && o.material.isMeshStandardMaterial) {
+          o.material.envMapIntensity = 0.9;
+        }
+      });
+
+      // hinge: re-parent the lid under our own pivot so rotation.x is a clean world-X swing
+      const lid = model.getObjectByName("Lid");
+      const pivotNode = model.getObjectByName("HingePivot");
+      if (lid && pivotNode) {
+        const p = pivotNode.getWorldPosition(new THREE.Vector3());
+        hingePivot = new THREE.Group();
+        laptop.worldToLocal(p);
+        hingePivot.position.copy(p);
+        laptop.add(hingePivot);
+        hingePivot.attach(lid);
+
+        // closed angle: swing the lid's in-plane "up" vector down onto the base (+z)
+        const sb = new THREE.Box3().setFromObject(screenMesh || lid);
+        const hi = new THREE.Vector3(0, sb.max.y, sb.min.z), lo = new THREE.Vector3(0, sb.min.y, sb.max.z);
+        laptop.worldToLocal(hi); laptop.worldToLocal(lo);
+        const up = hi.sub(lo);
+        const openAngle = Math.atan2(up.y, up.z);   // angle of the lid from the base plane
+        CLOSED = openAngle - 0.02;
+        CINEMA_LID = openAngle - Math.PI / 2;        // vertical, square to the camera
+        hingePivot.rotation.x = reduce ? OPEN : CLOSED;
+      }
+      laptop.updateMatrixWorld(true);
+      computeCinemaPose();
+      loaded = true;
+      if (reduce) renderer.render(scene, camera);
+    }, undefined, (err) => { console.error("MacBook model failed to load", err); showFallback(canvas); });
 
     /* ── Interaction state ── */
     let pointerX = 0, pointerY = 0, tX = 0, tY = 0;
@@ -178,22 +229,64 @@
         tY = (e.clientY / window.innerHeight) * 2 - 1;
       }, { passive: true });
     }
-    const floral = stage.querySelector(".showcase__floral");
     const texts = [...stage.querySelectorAll(".showcase__text")].map((el) => ({ el, d: parseFloat(el.dataset.parallax) || 1.5 }));
+
+    /* ── Cinema mode ── */
+    const setCinema = (on) => window.dispatchEvent(new CustomEvent("cinema", { detail: on }));
+
+    function enterCinema() {
+      if (!loaded || mode !== "idle") return;
+      mode = "toCinema"; blendStart = null;
+      stage.classList.add("is-cinema");
+      document.documentElement.classList.add("cinema-lock");
+      setCinema(true);
+      if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
+      video.muted = false;
+      try { video.currentTime = 0; } catch (e) {}
+      video.play().catch(() => {});
+      resize();
+    }
+    function exitCinema() {
+      if (mode === "idle" || mode === "toIdle") return;
+      mode = "toIdle"; blendStart = null;
+      stage.classList.remove("is-cinema-video");
+      video.controls = false;
+      video.muted = true;
+      if (document.fullscreenElement === stage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    }
+    function finishExit() {
+      stage.classList.remove("is-cinema");
+      document.documentElement.classList.remove("cinema-lock");
+      setCinema(false);
+      resize();
+    }
+    if (playBtn) playBtn.addEventListener("click", enterCinema);
+    canvas.addEventListener("click", enterCinema);
+    if (closeBtn) closeBtn.addEventListener("click", exitCinema);
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") exitCinema(); });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement && (mode === "cinema" || mode === "toCinema")) exitCinema();
+      resize();
+    });
 
     /* ── Resize ── */
     function resize() {
       W = stage.clientWidth; H = stage.clientHeight;
+      if (!W || !H) return;
       camera.aspect = W / H; camera.updateProjectionMatrix();
+      frameCamera();
+      if (loaded) computeCinemaPose();
       renderer.setSize(W, H, false);
     }
     window.addEventListener("resize", resize);
+    if ("ResizeObserver" in window) new ResizeObserver(() => resize()).observe(stage);
 
     /* ── Run only while in view ── */
     let running = true;
     if ("IntersectionObserver" in window) {
       new IntersectionObserver((ents) => {
         ents.forEach((e) => {
+          if (mode !== "idle") return;           // never interrupt the film in cinema mode
           running = e.isIntersecting;
           if (running) { playVideo(); start(); } else { video.pause(); }
         });
@@ -201,39 +294,59 @@
     }
 
     /* ── Render loop ── */
-    let raf = null, t0 = 0;
+    let raf = null;
+    const idleLook = new THREE.Vector3(), look = new THREE.Vector3();
     function frame(t) {
-      if (!running) { raf = null; return; }
+      if (!running && mode === "idle") { raf = null; return; }
       const time = t * 0.001;
       pointerX += (tX - pointerX) * 0.05;
       pointerY += (tY - pointerY) * 0.05;
 
-      // lid opening animation (runs once, the first time the scene is on screen)
-      if (wantOpen) {
-        if (lidStart === null) lidStart = time;
-        const p = Math.min(1, (time - lidStart) / LID_DUR);
-        hinge.rotation.x = CLOSED + (OPEN - CLOSED) * easeOutCubic(p);
+      // lid opening (runs once, the first time the model is on screen)
+      let idleLid = OPEN;
+      if (loaded && hingePivot && wantOpen) {
+        if (lidStart === null) lidStart = time + 0.25;
+        const p = Math.min(1, Math.max(0, (time - lidStart) / LID_DUR));
+        idleLid = CLOSED + (OPEN - CLOSED) * easeOutCubic(p);
+        if (p >= 1) wantOpen = false;
       }
 
-      // floral backdrop reacts to the cursor (parallax — background moves opposite)
-      if (floral) {
-        floral.style.transform =
-          `scale(1.14) translate3d(${(-pointerX * 2.4).toFixed(2)}%, ${(-pointerY * 1.6).toFixed(2)}%, 0)`;
-      }
+      // cinema blend: 0 = idle pose, 1 = screen square to the camera
+      if (mode === "toCinema" || mode === "toIdle") {
+        if (blendStart === null) blendStart = time;
+        const p = Math.min(1, (time - blendStart) / CINEMA_DUR);
+        k = mode === "toCinema" ? easeInOut(p) : 1 - easeInOut(p);
+        if (p >= 1) {
+          if (mode === "toCinema") { mode = "cinema"; stage.classList.add("is-cinema-video"); video.controls = true; }
+          else { mode = "idle"; finishExit(); }
+        }
+      } else k = mode === "cinema" ? 1 : 0;
+
+      // the film backdrop reacts to the cursor (parallax — background moves opposite)
+      if (k === 0) {
+        video.style.transform = `scale(1.35) translate3d(${(-pointerX * 1.6).toFixed(2)}%, ${(-pointerY * 1.1).toFixed(2)}%, 0)`;
+      } else if (video.style.transform) video.style.transform = "";
       // floating scene text reacts to the cursor (foreground parallax — moves with it)
-      for (let k = 0; k < texts.length; k++) {
-        texts[k].el.style.transform =
-          `translate3d(${(pointerX * texts[k].d * 8).toFixed(1)}px, ${(pointerY * texts[k].d * 6).toFixed(1)}px, 0)`;
+      for (let i = 0; i < texts.length; i++) {
+        texts[i].el.style.transform =
+          `translate3d(${(pointerX * texts[i].d * 8).toFixed(1)}px, ${(pointerY * texts[i].d * 6).toFixed(1)}px, 0)`;
       }
 
-      // gentle float + auto sway + pointer parallax (never a full spin, screen stays toward camera)
-      laptop.rotation.y = Math.sin(time * 0.32) * 0.28 + pointerX * 0.45;
-      laptop.rotation.x = -0.04 + Math.sin(time * 0.45) * 0.015 + pointerY * 0.12;
-      laptop.position.y = -0.55 + Math.sin(time * 0.7) * 0.045;
+      // idle: gentle float + auto sway + pointer parallax; cinema: dead straight, screen to camera
+      const swayY = Math.sin(time * 0.32) * 0.28 + pointerX * 0.45;
+      const swayX = -0.04 + Math.sin(time * 0.45) * 0.015 + pointerY * 0.12;
+      const bob = RIG_Y + Math.sin(time * 0.7) * 0.045;
+      laptop.rotation.y = swayY * (1 - k);
+      laptop.rotation.x = swayX * (1 - k);
+      laptop.position.y = bob + (RIG_Y - bob) * k;
+      if (hingePivot) hingePivot.rotation.x = idleLid + (CINEMA_LID - idleLid) * k;
 
-      // Force the video frame onto the GPU every render. VideoTexture's auto-update
-      // (via requestVideoFrameCallback) doesn't fire reliably for a video composited
-      // behind the canvas, which left the screen blank white.
+      camera.position.lerpVectors(idleCamPos, cinema.camPos, k);
+      look.lerpVectors(idleLook.copy(IDLE_LOOK), cinema.center, k);
+      camera.lookAt(look);
+
+      // Force the video frame onto the GPU every render (VideoTexture auto-update is
+      // unreliable for a video composited behind the canvas).
       if (video.readyState >= video.HAVE_CURRENT_DATA) tex.needsUpdate = true;
 
       renderer.render(scene, camera);
@@ -242,6 +355,8 @@
     function start() { if (!raf) raf = requestAnimationFrame(frame); }
 
     if (reduce) { renderer.render(scene, camera); } else { start(); }
+    // cinema mode must animate even if the stage was scrolled out of view
+    window.addEventListener("cinema", (e) => { if (e.detail) { running = true; start(); } });
   }
 
   if (document.readyState === "loading") {

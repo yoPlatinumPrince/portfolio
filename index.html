@@ -9,9 +9,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <!-- fonts load without blocking first paint (swap in when ready) -->
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" /></noscript>
 
-  <link rel="stylesheet" href="css/styles.css?v=9" />
+  <link rel="stylesheet" href="css/styles.css?v=29" />
 </head>
 <body>
 
@@ -236,7 +238,7 @@
       </div>
 
       <div class="grid">
-        <article class="tile tile--wide" data-cursor="play">
+        <article class="tile tile--wide tile--16x9" data-cursor="play">
           <div class="tile__frame">
             <video loop muted playsinline preload="none" poster="assets/posters/ai-announcement.jpg" data-hover-video>
               <source src="assets/videos/ai-announcement.mp4" type="video/mp4" />
@@ -278,7 +280,7 @@
           </div>
         </article>
 
-        <article class="tile tile--reg" data-cursor="play">
+        <article class="tile tile--wide tile--16x9 tile--feature" data-cursor="play">
           <div class="tile__frame">
             <video loop muted playsinline preload="none" poster="assets/posters/social/instagram-1.jpg" data-hover-video>
               <source src="assets/videos/social/instagram-1.mp4" type="video/mp4" />
@@ -329,7 +331,7 @@
           </div>
         </article>
 
-        <article class="tile tile--reg" data-cursor="play">
+        <article class="tile tile--reg tile--square" data-cursor="play">
           <div class="tile__frame">
             <video loop muted playsinline preload="none" poster="assets/posters/timeline-1.jpg" data-hover-video>
               <source src="assets/videos/timeline-1.mp4" type="video/mp4" />
@@ -369,6 +371,108 @@
       </div>
     </section>
 
+    <!-- ════════ LAUNCH VIDEOS ════════ -->
+    <section class="launch" id="launch">
+      <div class="chapter" data-reveal>
+        <span class="chapter__idx">▶</span>
+        <span class="chapter__label">Launch Videos</span>
+        <span class="chapter__line"></span>
+      </div>
+      <div class="launch__wrap">
+        <aside class="launch__note" data-reveal>
+          <span class="mv-note__label">Launch</span>
+          <p class="mv-note__line">Big moments, <em>told right.</em></p>
+          <p class="mv-note__body">Three films for Runable — a product launch cut to the beat, a funding milestone announced founder-to-camera, and a kinetic-type app launch that builds to the reveal. Written, edited and animated end to end.</p>
+        </aside>
+
+        <figure class="launch__player launch__player--hero" data-reveal data-cursor="play">
+          <div class="launch__frame">
+            <video class="launch__video" loop muted playsinline preload="none" poster="assets/posters/launch-may.jpg" data-autoplay-inview data-featured-video>
+              <source src="assets/videos/launch-may.mp4" type="video/mp4" />
+            </video>
+            <span class="mv__sound" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+              <em>Hover for sound</em>
+            </span>
+          </div>
+          <figcaption class="launch__cap">
+            <div>
+              <span class="launch__title">Runable — May Launches</span>
+              <span class="launch__sub">Runable · Launch Film · 2026</span>
+            </div>
+            <span class="launch__tag">Direction · Edit · Motion</span>
+          </figcaption>
+        </figure>
+
+        <figure class="launch__player" data-reveal data-cursor="play">
+          <div class="launch__frame">
+            <video class="launch__video" loop muted playsinline preload="none" poster="assets/posters/launch-26m.jpg" data-autoplay-inview data-featured-video>
+              <source src="assets/videos/launch-26m.mp4" type="video/mp4" />
+            </video>
+            <span class="mv__sound" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+              <em>Hover for sound</em>
+            </span>
+          </div>
+          <figcaption class="launch__cap">
+            <div>
+              <span class="launch__title">26 Million — Funding Announcement</span>
+              <span class="launch__sub">Runable · Announcement Film · 2026</span>
+            </div>
+            <span class="launch__tag">Direction · Edit · Motion</span>
+          </figcaption>
+        </figure>
+
+        <figure class="launch__player" data-reveal data-cursor="play">
+          <div class="launch__frame">
+            <video class="launch__video" loop muted playsinline preload="none" poster="assets/posters/app-launch.jpg" data-autoplay-inview data-featured-video>
+              <source src="assets/videos/app-launch.mp4" type="video/mp4" />
+            </video>
+            <span class="mv__sound" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+              <em>Hover for sound</em>
+            </span>
+          </div>
+          <figcaption class="launch__cap">
+            <div>
+              <span class="launch__title">Runable — App Launch</span>
+              <span class="launch__sub">Runable · Launch Film · 2026</span>
+            </div>
+            <span class="launch__tag">Script · Kinetic Type · Edit</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ════════ ENGAGING REELS ════════ -->
+    <section class="work reels" id="reels">
+      <div class="chapter" data-reveal>
+        <span class="chapter__idx">◎</span>
+        <span class="chapter__label">Hype reel</span>
+        <span class="chapter__line"></span>
+      </div>
+      <div class="reels__note" data-reveal>
+        <span class="mv-note__label">Hype reel</span>
+        <p class="mv-note__line">Built to <em>stop the scroll.</em></p>
+        <p class="mv-note__body">Short, loud and rhythm-led — hooks in the first second, cuts on the beat, and typography that carries the sound. Hover any reel to play it with sound.</p>
+      </div>
+      <!-- Instagram-style grid: one <figure class="reel"> per reel (9:16 clips) -->
+      <div class="reelgrid reelgrid--two" data-reveal>
+        <figure class="reel" data-cursor="play">
+          <video loop muted playsinline preload="none" poster="assets/posters/reel-mma.jpg" data-hover-video aria-label="MMA assessment reel">
+            <source src="assets/videos/reel-mma.mp4" type="video/mp4" />
+          </video>
+          <span class="reel__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="2.5" width="19" height="19" rx="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg></span>
+        </figure>
+        <figure class="reel" data-cursor="play">
+          <video loop muted playsinline preload="none" poster="assets/posters/reel-fireflies.jpg" data-hover-video aria-label="Fireflies — Project 44 Hours reel">
+            <source src="assets/videos/reel-fireflies.mp4" type="video/mp4" />
+          </video>
+          <span class="reel__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="2.5" width="19" height="19" rx="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg></span>
+        </figure>
+      </div>
+    </section>
+
     <!-- ════════ 3D DEVICE SHOWCASE ════════ -->
     <section class="showcase" id="showcase">
       <div class="chapter" data-reveal>
@@ -376,16 +480,15 @@
         <span class="chapter__label">In Frame</span>
         <span class="chapter__line"></span>
       </div>
-      <div class="showcase__stage">
-        <!-- floral scene backdrop (soft botanical bokeh) -->
-        <img class="showcase__floral" src="assets/posters/floral-bg.jpg" alt="" aria-hidden="true" />
-        <!-- texture source for the 3D screen — full-size & in-flow (transparent, behind the canvas)
-             so every browser, incl. Safari, decodes its frames for the VideoTexture -->
-        <video id="mbVideo" autoplay loop muted playsinline preload="auto" poster="assets/posters/maybach-music-video.jpg"
-               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:1">
-          <source src="assets/videos/maybach-music-video.mp4" type="video/mp4" />
-        </video>
-        <canvas class="showcase__canvas" id="mbCanvas" aria-label="3D laptop playing the Maybach AI film" style="position:relative;z-index:2"></canvas>
+      <div class="showcase__stage" id="mbStage">
+        <!-- the film itself is the backdrop AND the texture source for the 3D screen -->
+        <div class="showcase__bg" id="mbBg">
+          <video id="mbVideo" class="showcase__bgvideo" loop muted playsinline preload="metadata" poster="assets/posters/maybach-music-video.jpg">
+            <source src="assets/videos/maybach-music-video.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div class="showcase__dim" aria-hidden="true"></div>
+        <canvas class="showcase__canvas" id="mbCanvas" data-cursor="play" aria-label="3D MacBook Pro playing the Maybach AI film"></canvas>
         <div class="showcase__glow" aria-hidden="true"></div>
         <div class="showcase__text showcase__text--tl" data-parallax="1.4">
           <p class="st__line">Real cars,<br><em>unreal</em> worlds.</p>
@@ -394,6 +497,13 @@
           <p class="st__line st__line--sm">Maybach — AI Film</p>
           <span class="st__sub">Direction &amp; AI · Platinum Prince</span>
         </div>
+        <button class="showcase__play" id="mbPlay" type="button" data-cursor="play" aria-label="Play the Maybach film fullscreen with sound">
+          <span class="showcase__play-ring" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg></span>
+          <span class="showcase__play-txt">Play film <em>with sound</em></span>
+        </button>
+        <button class="showcase__close" id="mbClose" type="button" aria-label="Close the film">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
         <noscript><video class="showcase__fallback" autoplay loop muted playsinline poster="assets/posters/maybach-music-video.jpg"><source src="assets/videos/maybach-music-video.mp4" type="video/mp4" /></video></noscript>
       </div>
       <div class="showcase__cap">
@@ -469,6 +579,24 @@
           <span class="idx-row__title">Personal Edit</span>
           <span class="idx-row__cat">Editing</span>
           <span class="idx-row__year">2023</span>
+        </a>
+        <a class="idx-row" href="#launch" data-cursor="view" data-preview="assets/posters/launch-26m.jpg">
+          <span class="idx-row__no">014</span>
+          <span class="idx-row__title">26 Million — Funding Announcement</span>
+          <span class="idx-row__cat">Launch Film · Runable</span>
+          <span class="idx-row__year">2026</span>
+        </a>
+        <a class="idx-row" href="#launch" data-cursor="view" data-preview="assets/posters/launch-may.jpg">
+          <span class="idx-row__no">016</span>
+          <span class="idx-row__title">Runable — May Launches</span>
+          <span class="idx-row__cat">Launch Film · Runable</span>
+          <span class="idx-row__year">2026</span>
+        </a>
+        <a class="idx-row" href="#launch" data-cursor="view" data-preview="assets/posters/app-launch.jpg">
+          <span class="idx-row__no">015</span>
+          <span class="idx-row__title">Runable — App Launch</span>
+          <span class="idx-row__cat">Launch Film · Runable</span>
+          <span class="idx-row__year">2026</span>
         </a>
       </div>
 
@@ -650,7 +778,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/macbook.js?v=9"></script>
-  <script src="js/main.js?v=9"></script>
+  <script src="js/vendor/GLTFLoader.js?v=29"></script>
+  <script src="js/vendor/DRACOLoader.js?v=29"></script>
+  <script src="js/vendor/RoomEnvironment.js?v=29"></script>
+  <script src="js/macbook.js?v=29"></script>
+  <script src="js/main.js?v=29"></script>
 </body>
 </html>
